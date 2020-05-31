@@ -3,7 +3,7 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
     networks:
-      - frontend
+      - search_engine
     restart: always
     volumes:
       - data01:/usr/share/elasticsearch/data
@@ -13,10 +13,19 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
+    
+  tika:
+    image: apache/tika:1.24.1-full
+    networks: 
+      - search_engine
+    ports:
+        - 9998:9998
+
+
 volumes:
   data01: 
     driver: local
 
     
 networks:
-  frontend:
+  search_engine:
