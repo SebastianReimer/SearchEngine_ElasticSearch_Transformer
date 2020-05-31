@@ -2,6 +2,15 @@
 
 Das Repo beinhaltet eine Suchmaschine, die auf ElasticSearch (ES) basiert. Darüber hinaus können Antworten auf Fragen(mithilfe eines Transformers auf Grundlage der Daten in ES extrahiert. Die GUI ist Browser-basiert und wurde mit Flask erstellt.
 
+## Dieses Repo basiert in erster Linie auf folgenden Repos
+
+- Haystack: https://github.com/deepset-ai/haystack
+- Building-a-search-engine-using-Elasticsearch: https://github.com/dineshsonachalam/Building-a-search-engine-using-Elasticsearch
+- 
+
+
+
+
 ## Nutzung
 
 ### Einrichtung
@@ -12,6 +21,7 @@ Das Repo beinhaltet eine Suchmaschine, die auf ElasticSearch (ES) basiert. Darü
   * Klone haystack-Repo https://github.com/deepset-ai/haystack
   * Aktiviere conda env `flask`
   * Wechsle in das haystack-Repo und installiere das Repo über pip: `(flask) $ pip install --editable .`
+  * Installiere watchdog in in env `flask`: `pip install watchdog`
 
 ### Daten einlesen (einmalig)
 1. ES mithilfe von Docker starten
@@ -54,6 +64,7 @@ $ docker-compose -f docker-compose_dev.yml up
 - Einlesen aller Dateien (pdf, Word, powerpoint) mithilfe von Tika und Ablegen der Extrahierten Daten in ES:
  * pdf, word einlesen mit Tika in python
  * Extrahierte Texte in ES ablegen
- * Watcher schreiben; er erkennt Dateiänderungen welcher Mechanismus?
+ * `done` Watcher schreiben; er erkennt Dateiänderungen welcher Mechanismus?
+  --> Anleitung: **http://thepythoncorner.com/dev/how-to-create-a-watchdog-in-python-to-look-for-filesystem-changes/**
  * Aktualisierung von Datei-dokumenten --> Realisierung? 2. Tabelle?
 
