@@ -21,7 +21,8 @@ Das Repo beinhaltet eine Suchmaschine, die auf ElasticSearch (ES) basiert. Darü
   * Klone haystack-Repo https://github.com/deepset-ai/haystack
   * Aktiviere conda env `flask`
   * Wechsle in das haystack-Repo und installiere das Repo über pip: `(flask) $ pip install --editable .`
-  * Installiere watchdog in in env `flask`: `pip install watchdog`
+  * Installiere watchdog in env `flask`: `pip install watchdog`
+  * Installiere Tika in env `flask`: `pip install tika`
 
 ### Daten einlesen (einmalig)
 1. ES mithilfe von Docker starten
@@ -67,4 +68,6 @@ $ docker-compose -f docker-compose_dev.yml up
  * `done` Watcher schreiben; er erkennt Dateiänderungen welcher Mechanismus?
   --> Anleitung: **http://thepythoncorner.com/dev/how-to-create-a-watchdog-in-python-to-look-for-filesystem-changes/**
  * Aktualisierung von Datei-dokumenten --> Realisierung? 2. Tabelle?
+ * add logging: z.B. für watcher: datei erstellt, modififiziert; für tika: datei eingelesen
+ * Pip-requirements in txt-auslesen und abspeichern
 
