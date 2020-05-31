@@ -8,6 +8,9 @@ Watcher looks for file creations and changes
 import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
+from tika import parser
+from haystack.database.elasticsearch import ElasticsearchDocumentStore
+from indexing.io import write_texts_to_db
 
 #Define varibles 
 patterns = ["*.pdf", "*.txt"]              #file patterns we want to handle
@@ -15,13 +18,25 @@ ignore_patterns = ""        #file patterns we want to exclude, here no other fil
 ignore_directories = False  # directories which shall not be watched
 case_sensitive = True       # Important: windows' file system is case insensitive!
 
-path = "./.."              #define start path to be watched
+path = "./data"              #define start path to be watched
 go_recursively = True   # define whether subdirectories will be watched
 
 sleep_time = 1 # interval ([seconds]) in which paths will be watched
 
+document_store = ElasticsearchDocumentStore(host="localhost", username="", password="", index="document")
 
 def on_created(event):
+    parsed_data = parser.from_file(event.src_path, 'http://localhost:9998/tika')
+    #display parsed content
+    parsed_text = str(parsed_data['content'])
+    print(type(event.src_path))
+    #TODO: read data into ES using haystack
+    write_texts_to_db(text=parsed_text,
+                    path_name=event.src_path, 
+                    document_store=document_store,
+                    clean_func=None, 
+                    only_empty_db=False, 
+                    split_paragraphs=False)
     print(f"File created: {event.src_path}")
 
 def on_deleted(event):
