@@ -18,6 +18,8 @@ case_sensitive = True       # Important: windows' file system is case insensitiv
 path = "./.."              #define start path to be watched
 go_recursively = True   # define whether subdirectories will be watched
 
+sleep_time = 1 # interval ([seconds]) in which paths will be watched
+
 
 def on_created(event):
     print(f"File created: {event.src_path}")
@@ -48,7 +50,7 @@ if __name__ == "__main__":
     my_observer.start()
     try:
         while True:
-            time.sleep(1)   # sleep for x seconds
+            time.sleep(sleep_time)   # sleep for x seconds
     except KeyboardInterrupt:
         my_observer.stop()
         my_observer.join()
