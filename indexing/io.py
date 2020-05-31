@@ -48,7 +48,5 @@ def write_texts_to_db(text, path_name, document_store, clean_func=None, only_emp
                     }
                 )
 
-    print(docs_to_index)
-    print(docs_to_index[0])
     document_store.write_documents(docs_to_index)
-    logger.info(f"Wrote {len(docs_to_index)} docs to DB")
+    logger.info(f"Wrote text docs to DB")
