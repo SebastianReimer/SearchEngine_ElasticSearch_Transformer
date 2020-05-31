@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon May 25 16:26:59 2020
-
-@author: sebastian
+Load preprocessed text files into ES
 """
 
 import logging
