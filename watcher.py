@@ -5,12 +5,14 @@
 Watcher looks for file creations and changes
 """
 import logging
+from pathlib import Path
 import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 from tika import parser
 from haystack.database.elasticsearch import ElasticsearchDocumentStore
 from indexing.io import write_texts_to_db
+
 
 # create logger 
 logger = logging.getLogger(__name__)
@@ -23,7 +25,8 @@ ignore_patterns = ""        #file patterns we want to exclude, here no other fil
 ignore_directories = False  # directories which shall not be watched
 case_sensitive = True       # Important: windows' file system is case insensitive!
 
-path = "./data"              #define start path to be watched
+path = Path("./data")              #define start path to be watched
+logger.info(f"path(s) to be oberserved:\n{path.absolute()} ")
 go_recursively = True   # define whether subdirectories will be watched
 
 sleep_time = 1 # interval ([seconds]) in which paths will be watched
@@ -39,6 +42,8 @@ def on_created(event):
     """
     parsed_data = parser.from_file(event.src_path, 'http://localhost:9998/tika')
     parsed_text = str(parsed_data['content'])
+
+
 
     write_texts_to_db(text=parsed_text,
                     path_name=event.src_path, 
@@ -68,7 +73,7 @@ if __name__ == "__main__":
     my_event_handler.on_moved = on_moved
 
     my_observer = Observer()
-    my_observer.schedule(my_event_handler, path, recursive=go_recursively)
+    my_observer.schedule(my_event_handler, str(path.absolute()), recursive=go_recursively)
 
     my_observer.start()
     try:

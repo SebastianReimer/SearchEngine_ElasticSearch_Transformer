@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import logging
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +18,9 @@ def write_texts_to_db(text, path_name, document_store, clean_func=None, only_emp
                               Useful to avoid indexing the same initial docs again and again.
     :return: None
     """
+    #get absolute path as string
     path = Path(path_name)
-
+    abs_path = str(path.absolute())
     
     if only_empty_db:
         n_docs = document_store.get_document_count()
@@ -29,21 +31,24 @@ def write_texts_to_db(text, path_name, document_store, clean_func=None, only_emp
 
     docs_to_index = []
 
+    # hash the path for an document identifier
+    doc_id = hashlib.md5(abs_path.encode()) 
+
     if split_paragraphs:
         for para in text.split("\n\n"):
             if not para.strip():  # skip empty paragraphs
                 continue
             docs_to_index.append(
-                    {
-                        "name": path.name,
+                    {   "doc_id": doc_id.hexdigest(), 
+                        "name": abs_path,
                         "text": para
                     }
                 )
                     
     else:
         docs_to_index.append(
-                    {
-                        "name": path.name,
+                    {   "doc_id": doc_id.hexdigest(), 
+                        "name": abs_path,
                         "text": text
                     }
                 )
