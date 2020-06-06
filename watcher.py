@@ -10,8 +10,10 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 from tika import parser
-from haystack.database.elasticsearch import ElasticsearchDocumentStore
-from indexing.io import write_texts_to_db
+#from haystack.database.elasticsearch import ElasticsearchDocumentStore
+from DocumentStore import ES_DocumentStore
+import hashlib
+from indexing.io import write_texts_to_db, update_text
 
 
 # create logger 
@@ -20,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(leve
 
 
 #Define varibles 
-patterns = ["*.pdf", "*.txt"]              #file patterns we want to handle
+patterns = ["*.pdf", "*.txt", "*.docx"]              #file patterns we want to handle
 ignore_patterns = ""        #file patterns we want to exclude, here no other files
 ignore_directories = False  # directories which shall not be watched
 case_sensitive = True       # Important: windows' file system is case insensitive!
@@ -31,15 +33,23 @@ go_recursively = True   # define whether subdirectories will be watched
 
 sleep_time = 1 # interval ([seconds]) in which paths will be watched
 
-document_store = ElasticsearchDocumentStore(host="localhost", username="", password="", index="document")
+# = ElasticsearchDocumentStore(host="localhost", username="", password="", index="document")
+es_docstore = ES_DocumentStore(host = 'localhost',
+                username= "",
+                password="",
+                scheme="http",
+                index ='document',
+                ca_certs=False,
+                verify_certs=True)
 
 def on_created(event):
+    #delete because it is not needed hence  on_modified 
     """
     If text file is created, content is parsed and ingested into DB
 
     :param event: 
     :return: None
-    """
+    
     parsed_data = parser.from_file(event.src_path, 'http://localhost:9998/tika')
     parsed_text = str(parsed_data['content'])
 
@@ -53,12 +63,51 @@ def on_created(event):
                     split_paragraphs=False)
     logger.info(f"File created: {event.src_path}")
     print(f"File created: {event.src_path}")
-
+    """
 def on_deleted(event):
     print(f"File deleted: {event.src_path}")
 
 def on_modified(event):
-    print(f"File modified: {event.src_path}")
+    """
+    If a text file is created, the content is parsed and ingested into DB.
+    If a text file is modified, the content is parsed an updated  in the DB
+
+    :param event: 
+    :return: None
+    """
+    path_name = event.src_path
+    parsed_data = parser.from_file(path_name, 'http://localhost:9998/tika')
+    parsed_text = str(parsed_data['content'])
+
+    #get absolute path as string
+    path = Path(path_name)
+    abs_path = str(path.absolute())
+    # hash the path for an document identifier
+    doc_id = hashlib.md5(abs_path.encode()) 
+    doc_id = doc_id.hexdigest()
+    
+    #check if file already exists in db
+    query = { "bool": {"must":{"term" :{"doc_id":f"{doc_id}"}}}}
+    res = es_docstore.client.search(index=es_docstore.index, body={"query":query})
+
+    if (len(res['hits']['hits']) == 0):
+        # load data into DB
+        write_texts_to_db(text=parsed_text,
+                    path_name=event.src_path, 
+                    document_store=es_docstore,
+                    clean_func=None, 
+                    only_empty_db=False, 
+                    split_paragraphs=False)
+        logger.info(f"File created: {event.src_path}")
+        
+    else:
+        # Update data in DB
+        update_text(document_store=es_docstore,
+                    index=es_docstore.index,
+                    doc_id=doc_id,
+                    parsed_text=parsed_text)
+        logger.info(f"File modified: {event.src_path}")
+
 
 def on_moved(event):
     print(f"File moved: from {event.src_path} to {event.dest_path}")

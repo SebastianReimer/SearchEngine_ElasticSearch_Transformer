@@ -55,3 +55,18 @@ def write_texts_to_db(text, path_name, document_store, clean_func=None, only_emp
 
     document_store.write_documents(docs_to_index)
     logger.info(f"Wrote text docs to DB")
+
+def update_text(document_store, index, doc_id, parsed_text):
+        """
+        Updates the text field of document in the DB
+
+        :param document_store: An ElasticSearchDocumentStore
+        :param index: Index, where the document is located to be updated
+        :param doc_id: Document identifier as a hash
+        :param parsed_text: Text which should be updated in the corressponding text field
+        :return: None
+        """
+        script =  {"source" : f"ctx._source['text'] = '{parsed_text}'"}
+        query = { "bool": {"must":{"term" :{"doc_id":f"{doc_id}"}}}}
+        document_store.client.update_by_query(index=index, body={"script": script, "query": query})
+        logger.info(f"Updated text from changed file.")
