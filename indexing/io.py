@@ -4,6 +4,8 @@
 from pathlib import Path
 import logging
 import hashlib
+import os
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +36,17 @@ def write_texts_to_db(text, path_name, document_store, clean_func=None, only_emp
     # hash the path for an document identifier
     doc_id = hashlib.md5(abs_path.encode()) 
 
+
+    ts, ts_readable = _get_modtime(abs_path)
+
     if split_paragraphs:
         for para in text.split("\n\n"):
             if not para.strip():  # skip empty paragraphs
                 continue
             docs_to_index.append(
-                    {   "doc_id": doc_id.hexdigest(), 
+                    {   "doc_id": doc_id.hexdigest(),
+                        "ts": ts, 
+                        "ts_readable": ts_readable,
                         "name": abs_path,
                         "text": para
                     }
@@ -47,7 +54,9 @@ def write_texts_to_db(text, path_name, document_store, clean_func=None, only_emp
                     
     else:
         docs_to_index.append(
-                    {   "doc_id": doc_id.hexdigest(), 
+                    {   "doc_id": doc_id.hexdigest(),
+                        "ts": ts,  
+                        "ts_readable": ts_readable,
                         "name": abs_path,
                         "text": text
                     }
@@ -56,17 +65,24 @@ def write_texts_to_db(text, path_name, document_store, clean_func=None, only_emp
     document_store.write_documents(docs_to_index)
     logger.info(f"Wrote text docs to DB")
 
-def update_text(document_store, index, doc_id, parsed_text):
+def update_text(document_store, index, path_name, doc_id, parsed_text):
         """
         Updates the text field of document in the DB
 
         :param document_store: An ElasticSearchDocumentStore
         :param index: Index, where the document is located to be updated
+        :param path_name: path for the file which will be updated
         :param doc_id: Document identifier as a hash
         :param parsed_text: Text which should be updated in the corressponding text field
         :return: None
         """
-        script =  {"source" : f"ctx._source['text'] = '{parsed_text}'"}
+        #get absolute path as string
+        path = Path(path_name)
+        abs_path = str(path.absolute())
+
+        ts, ts_readable = _get_modtime(abs_path)
+
+        script =  {"source" : f"ctx._source['text'] = '{parsed_text}'; ctx._source['ts'] = {ts}; ctx._source['ts_readable'] = '{ts_readable}'"}
         query = { "bool": {"must":{"term" :{"doc_id":f"{doc_id}"}}}}
         document_store.client.update_by_query(index=index, body={"script": script, "query": query})
         logger.info(f"Updated text from changed file.")
@@ -89,3 +105,15 @@ def update_text_docid(document_store, index, source_doc_id, dest_doc_id, dest_pa
         query = { "bool": {"must":{"term" :{"doc_id":f"{source_doc_id}"}}}}
         document_store.client.update_by_query(index=index, body={"script": script, "query": query})
         logger.info(f"Updated text from changed file.")
+
+def _get_modtime(file_path):
+    """
+    Determines the modification time of a file ("when was the last time modified"?)
+
+    :param file_path: Path for file whose modification time should be determined 
+    :return ts, ts_readable: timestamps, one in milliseconds and the other human readable
+    """
+    statbuf = os.stat(file_path)
+    ts = statbuf.st_mtime
+    ts_readable = datetime.datetime.fromtimestamp(statbuf.st_mtime)
+    return int(ts), ts_readable

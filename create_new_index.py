@@ -25,6 +25,8 @@ if __name__ == "__main__":
 					
 				"properties":
 					{"doc_id": {"type":"keyword"},
+                        "ts":{"type": "date"},
+                        "ts_readable":{"type": "text"},
 						"name":{"type":"text"},
 						"text":{"type":"text"}
 					}

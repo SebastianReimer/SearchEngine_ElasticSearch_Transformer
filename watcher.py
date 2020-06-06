@@ -91,6 +91,7 @@ def on_modified(event):
         # Update data in DB
         update_text(document_store=es_docstore,
                     index=es_docstore.index,
+                    path_name=event.src_path,
                     doc_id=doc_id,
                     parsed_text=parsed_text)
         logger.info(f"File modified in DB: {event.src_path}")
