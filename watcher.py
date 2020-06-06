@@ -65,9 +65,18 @@ def on_created(event):
     print(f"File created: {event.src_path}")
     """
 def on_deleted(event):
+    """
+    Deletes the entry for a the deleted file in the DB
 
-    es_docstore.client.delete_by_query(index=es_docstore.index, body={"query":query})
-    print(f"File deleted: {event.src_path}")
+    :param event: 
+    :return: None
+    """
+    path_name = event.src_path
+    doc_id = _create_hash(path_name)
+
+    query = { "bool": {"must":{"term" :{"doc_id":f"{doc_id}"}}}}
+    es_docstore.client.delete_by_query(index=es_docstore.index, body={"query":query}, refresh=True)
+    logger.info(f"File deleted from DB: {event.src_path}")
 
 def on_modified(event):
     """
@@ -95,7 +104,7 @@ def on_modified(event):
                     clean_func=None, 
                     only_empty_db=False, 
                     split_paragraphs=False)
-        logger.info(f"File created: {event.src_path}")
+        logger.info(f"File created in DB: {event.src_path}")
         
     else:
         # Update data in DB
@@ -103,7 +112,7 @@ def on_modified(event):
                     index=es_docstore.index,
                     doc_id=doc_id,
                     parsed_text=parsed_text)
-        logger.info(f"File modified: {event.src_path}")
+        logger.info(f"File modified in DB: {event.src_path}")
 
 
 def on_moved(event):
