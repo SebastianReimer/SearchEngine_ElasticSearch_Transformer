@@ -70,3 +70,22 @@ def update_text(document_store, index, doc_id, parsed_text):
         query = { "bool": {"must":{"term" :{"doc_id":f"{doc_id}"}}}}
         document_store.client.update_by_query(index=index, body={"script": script, "query": query})
         logger.info(f"Updated text from changed file.")
+
+def update_text_docid(document_store, index, source_doc_id, dest_doc_id, dest_path_name):
+        """
+        Updates the name (path) field and the doc_id field of document in the DB
+        if a file ist moved on the file system.
+
+        :param document_store: An ElasticSearchDocumentStore
+        :param index: Index, where the document is located to be updated
+        :param source_doc_id: Document identifier as a hash for the source file
+        :param dest_id: Document identifier as a hash for the destination file
+        :param dest_path_name: Path name of the destination file
+        :return: None
+        """
+        script =  {"source" : f"ctx._source['name'] = '{dest_path_name}'; ctx._source['doc_id'] = '{dest_doc_id}'" }
+        logger.debug(f"Source_doc_id: {source_doc_id}")
+        logger.debug(f"dest_doc_id: {dest_doc_id}")
+        query = { "bool": {"must":{"term" :{"doc_id":f"{source_doc_id}"}}}}
+        document_store.client.update_by_query(index=index, body={"script": script, "query": query})
+        logger.info(f"Updated text from changed file.")

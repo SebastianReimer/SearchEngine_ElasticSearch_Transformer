@@ -13,7 +13,7 @@ from tika import parser
 #from haystack.database.elasticsearch import ElasticsearchDocumentStore
 from DocumentStore import ES_DocumentStore
 import hashlib
-from indexing.io import write_texts_to_db, update_text
+from indexing.io import write_texts_to_db, update_text, update_text_docid
 
 
 # create logger 
@@ -44,26 +44,7 @@ es_docstore = ES_DocumentStore(host = 'localhost',
 
 def on_created(event):
     #delete because it is not needed hence  on_modified 
-    """
-    If text file is created, content is parsed and ingested into DB
-
-    :param event: 
-    :return: None
-    
-    parsed_data = parser.from_file(event.src_path, 'http://localhost:9998/tika')
-    parsed_text = str(parsed_data['content'])
-
-
-
-    write_texts_to_db(text=parsed_text,
-                    path_name=event.src_path, 
-                    document_store=document_store,
-                    clean_func=None, 
-                    only_empty_db=False, 
-                    split_paragraphs=False)
-    logger.info(f"File created: {event.src_path}")
-    print(f"File created: {event.src_path}")
-    """
+    pass
 def on_deleted(event):
     """
     Deletes the entry for a the deleted file in the DB
@@ -116,7 +97,26 @@ def on_modified(event):
 
 
 def on_moved(event):
-    print(f"File moved: from {event.src_path} to {event.dest_path}")
+    """
+    If a file is moved in the file system, the path (and the corresponding doc_id)
+    is updated in the DB
+
+    :param event: 
+    :return: None
+    """
+    source_path_name = event.src_path
+    source_doc_id = _create_hash(source_path_name)
+
+    dest_path_name = event.dest_path
+    dest_doc_id = _create_hash(dest_path_name)
+
+    update_text_docid(document_store=es_docstore,
+                        index=es_docstore.index,
+                        source_doc_id=source_doc_id,
+                        dest_doc_id=dest_doc_id,
+                        dest_path_name=dest_path_name)
+
+    logger.info(f"File moved: from {event.src_path} to {event.dest_path}")
 
 def _create_hash(path_name):
     """
