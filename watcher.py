@@ -65,6 +65,8 @@ def on_created(event):
     print(f"File created: {event.src_path}")
     """
 def on_deleted(event):
+
+    es_docstore.client.delete_by_query(index=es_docstore.index, body={"query":query})
     print(f"File deleted: {event.src_path}")
 
 def on_modified(event):
@@ -79,12 +81,7 @@ def on_modified(event):
     parsed_data = parser.from_file(path_name, 'http://localhost:9998/tika')
     parsed_text = str(parsed_data['content'])
 
-    #get absolute path as string
-    path = Path(path_name)
-    abs_path = str(path.absolute())
-    # hash the path for an document identifier
-    doc_id = hashlib.md5(abs_path.encode()) 
-    doc_id = doc_id.hexdigest()
+    doc_id = _create_hash(path_name)
     
     #check if file already exists in db
     query = { "bool": {"must":{"term" :{"doc_id":f"{doc_id}"}}}}
@@ -111,6 +108,21 @@ def on_modified(event):
 
 def on_moved(event):
     print(f"File moved: from {event.src_path} to {event.dest_path}")
+
+def _create_hash(path_name):
+    """
+    Creates a hash based an the path name of a file
+
+    :param path_name: Path for a file
+    :return: hashed path_name which will serve as document identifier
+    """
+    #get absolute path as string
+    path = Path(path_name)
+    abs_path = str(path.absolute())
+    # hash the path for an document identifier
+    doc_id = hashlib.md5(abs_path.encode()) 
+    doc_id = doc_id.hexdigest()
+    return doc_id
 
 if __name__ == "__main__":
 
