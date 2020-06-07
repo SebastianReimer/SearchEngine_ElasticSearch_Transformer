@@ -49,6 +49,9 @@ $ docker-compose -f docker-compose_dev.yml up
 2. conda env `flask` starten und `(flask) $ python3 app.py` ausführen um den App-Server zu starten
 3. Unter http://localhost:8005 kann auf die Suchmaschine zugegriffen werden.
 
+## Nützliche Befehle
+- Eintrag mit der doc_id "3f465bd5a1b454ddf51064502acea077" suchen:`curl -X GET "localhost:9200/document/_search?q=doc_id:3f465bd5a1b454ddf51064502acea077"`
+
 # TODOs
 
 - `done` Entfernung des Scrapers 
@@ -63,11 +66,24 @@ $ docker-compose -f docker-compose_dev.yml up
 - Inferenzzeit reduzieren:
 	* ONNX?
 - Einlesen aller Dateien (pdf, Word, powerpoint) mithilfe von Tika und Ablegen der Extrahierten Daten in ES:
- * pdf, word einlesen mit Tika in python
- * Extrahierte Texte in ES ablegen
+ * `done` pdf, word einlesen mit Tika in python
+ * add ppt, word, excel?, txt files to tika
+ * `done` ES hat Probleme mit / bei der Suche, daher versuchen den Pfad als Namen eindeutig in einen String zu konvertieren-hashen?** --> **https://www.geeksforgeeks.org/md5-hash-python/
+ 
+ * `done` Extrahierte Texte in ES ablegen
  * `done` Watcher schreiben; er erkennt Dateiänderungen welcher Mechanismus?
   --> Anleitung: **http://thepythoncorner.com/dev/how-to-create-a-watchdog-in-python-to-look-for-filesystem-changes/**
- * Aktualisierung von Datei-dokumenten --> Realisierung? 2. Tabelle?
- * add logging: z.B. für watcher: datei erstellt, modififiziert; für tika: datei eingelesen
- * Pip-requirements in txt-auslesen und abspeichern
+ * `done` Aktualisierung von Datei-dokumenten --> Realisierung? 2. Tabelle?
+- `done` add logging: z.B. für watcher: datei erstellt, modififiziert; für tika: datei eingelesen
+- Pip-requirements in txt-auslesen und abspeichern
+- `done` Watcher erkennt nur Dateiänderungen ab dem Zeit seitdem er läuft --> Zu Beginn müssen der Watcher einmal durchlaufen und alle Dateien einlesen
+- `done` Angenommen der Watcher läuft nicht die ganze Zeit, dann können die Datei-Änderungen nicht getracked und in ES upgedated werden. --> z.B. extra Feld mit "zuletzt gändert". Weiteren Ansatz ausdenken  
+- `done`in watcher.py: für es client eine Klasse anlegen
+- **Weitermachen: Watcher in allen Kombis testen (wenn er ausgeschalten war**
+    * ob neue Dateien eingelesen werden,
+    * alte Einträge aus DB gelöscht werden
+    * modifizierte Dateien geupdated werden
+    * rekursiv testen
+
+
 
