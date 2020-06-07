@@ -84,6 +84,7 @@ $ docker-compose -f docker-compose_dev.yml up
     * alte Einträge aus DB gelöscht werden
     * modifizierte Dateien geupdated werden
     * rekursiv testen
+- dev_read_data_with_tika in master mergen
 
 
 
