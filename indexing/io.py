@@ -67,9 +67,9 @@ def write_texts_to_db(text, path_name, document_store, clean_func=None, only_emp
 
 def update_text(document_store, index, path_name, doc_id, parsed_text):
         """
-        Updates the text field of document in the DB
+        Updates the text field, ts and ts_readable of document in the DB
 
-        :param document_store: An ElasticSearchDocumentStore
+        :param document_store: Instance of ES_DocumentStore
         :param index: Index, where the document is located to be updated
         :param path_name: path for the file which will be updated
         :param doc_id: Document identifier as a hash
@@ -85,26 +85,27 @@ def update_text(document_store, index, path_name, doc_id, parsed_text):
         script =  {"source" : f"ctx._source['text'] = '{parsed_text}'; ctx._source['ts'] = {ts}; ctx._source['ts_readable'] = '{ts_readable}'"}
         query = { "bool": {"must":{"term" :{"doc_id":f"{doc_id}"}}}}
         document_store.client.update_by_query(index=index, body={"script": script, "query": query})
-        logger.info(f"Updated text from changed file.")
+        logger.info(f"Updated text, ts and ts_readable from changed file.")
 
 def update_text_docid(document_store, index, source_doc_id, dest_doc_id, dest_path_name):
         """
         Updates the name (path) field and the doc_id field of document in the DB
-        if a file ist moved on the file system.
+        if a file is moved on the file system.
 
-        :param document_store: An ElasticSearchDocumentStore
+        :param document_store: Instance of ES_DocumentStore
         :param index: Index, where the document is located to be updated
         :param source_doc_id: Document identifier as a hash for the source file
         :param dest_id: Document identifier as a hash for the destination file
         :param dest_path_name: Path name of the destination file
         :return: None
         """
+
         script =  {"source" : f"ctx._source['name'] = '{dest_path_name}'; ctx._source['doc_id'] = '{dest_doc_id}'" }
         logger.debug(f"Source_doc_id: {source_doc_id}")
         logger.debug(f"dest_doc_id: {dest_doc_id}")
         query = { "bool": {"must":{"term" :{"doc_id":f"{source_doc_id}"}}}}
         document_store.client.update_by_query(index=index, body={"script": script, "query": query})
-        logger.info(f"Updated text from changed file.")
+        logger.info(f"Updated name (path) and doc_id from changed file.")
 
 def _get_modtime(file_path):
     """
@@ -117,3 +118,33 @@ def _get_modtime(file_path):
     ts = statbuf.st_mtime
     ts_readable = datetime.datetime.fromtimestamp(statbuf.st_mtime)
     return int(ts), ts_readable
+
+def _create_hash(path_name):
+    """
+    Creates a hash based an the path name of a file
+
+    :param path_name: Path for a file
+    :return: hashed path_name which will serve as document identifier
+    """
+    #get absolute path as string
+    path = Path(path_name)
+    abs_path = str(path.absolute())
+    # hash the path for an document identifier
+    doc_id = hashlib.md5(abs_path.encode()) 
+    doc_id = doc_id.hexdigest()
+    return doc_id
+
+def get_all_files(patterns, path):
+    """
+    Gets all filenames in a given directory (recursively)
+
+    :param patterns: #file patterns we want to handle
+    :param path: root path as starting point
+    :return all_files: A list containing a all absolute paths to files matching the patterns
+    """
+    all_files = []
+    for pattern in patterns:
+        for file in path.rglob(pattern):
+            all_files.append(str(file.absolute()))
+    
+    return all_files
