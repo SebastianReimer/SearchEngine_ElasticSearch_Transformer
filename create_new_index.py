@@ -24,7 +24,9 @@ if __name__ == "__main__":
 				},
 					
 				"properties":
-					{"document_id": {"type":"integer"},
+					{"doc_id": {"type":"keyword"},
+                        "ts":{"type": "date"},
+                        "ts_readable":{"type": "text"},
 						"name":{"type":"text"},
 						"text":{"type":"text"}
 					}
@@ -42,8 +44,11 @@ if __name__ == "__main__":
     print("search_engine_template response.text:")
     print(response.text)
 
+
+    #index for document
     url = "http://localhost:9200/document"
     json_data = check_if_index_is_present(url)
+
 
     if(not 'error' in json_data):
         print("3. Deleted an index: document")
