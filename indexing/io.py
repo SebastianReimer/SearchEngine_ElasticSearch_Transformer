@@ -84,7 +84,7 @@ def update_text(document_store, index, path_name, doc_id, parsed_text):
 
         script =  {"source" : f"ctx._source['text'] = '{parsed_text}'; ctx._source['ts'] = {ts}; ctx._source['ts_readable'] = '{ts_readable}'"}
         query = { "bool": {"must":{"term" :{"doc_id":f"{doc_id}"}}}}
-        document_store.client.update_by_query(index=index, body={"script": script, "query": query})
+        document_store.client.update_by_query(index=index, body={"script": script, "query": query}, refresh=True)
         logger.info(f"Updated text, ts and ts_readable from changed file.")
 
 def update_text_docid(document_store, index, source_doc_id, dest_doc_id, dest_path_name):
@@ -104,7 +104,7 @@ def update_text_docid(document_store, index, source_doc_id, dest_doc_id, dest_pa
         logger.debug(f"Source_doc_id: {source_doc_id}")
         logger.debug(f"dest_doc_id: {dest_doc_id}")
         query = { "bool": {"must":{"term" :{"doc_id":f"{source_doc_id}"}}}}
-        document_store.client.update_by_query(index=index, body={"script": script, "query": query})
+        document_store.client.update_by_query(index=index, body={"script": script, "query": query}, refresh=True)
         logger.info(f"Updated name (path) and doc_id from changed file.")
 
 def _get_modtime(file_path):

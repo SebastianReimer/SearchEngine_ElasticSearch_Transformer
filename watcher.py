@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(leve
 
 
 #Define varibles 
-patterns = ["*.pdf", "*.txt", "*.docx"]              #file patterns we want to handle
+patterns = ["*.pdf", "*.txt", "*.docx"]              #file patterns we want to handle [^\.] excludes
 ignore_patterns = ""        #file patterns we want to exclude, here no other files
 ignore_directories = False  # directories which shall not be watched
 case_sensitive = True       # Important: windows' file system is case insensitive!
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     inDB_notFile = es_docstore.docs_exists_as_files(all_files) #these entries need to be deleted from the db
     if (inDB_notFile):
         es_docstore.delete_documents(inDB_notFile)
-    '''
+    
     #third: start watcher which keeps track of file changes
     my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
 
@@ -178,6 +178,6 @@ if __name__ == "__main__":
         my_observer.stop()
         my_observer.join()
 
-    '''
+    
 
 
