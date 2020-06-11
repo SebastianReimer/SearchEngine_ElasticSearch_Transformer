@@ -79,12 +79,20 @@ $ docker-compose -f docker-compose_dev.yml up
 - `done` Watcher erkennt nur Dateiänderungen ab dem Zeit seitdem er läuft --> Zu Beginn müssen der Watcher einmal durchlaufen und alle Dateien einlesen
 - `done` Angenommen der Watcher läuft nicht die ganze Zeit, dann können die Datei-Änderungen nicht getracked und in ES upgedated werden. --> z.B. extra Feld mit "zuletzt gändert". Weiteren Ansatz ausdenken  
 - `done`in watcher.py: für es client eine Klasse anlegen
-- **Weitermachen: Watcher in allen Kombis testen (wenn er ausgeschalten war**
-    * ob neue Dateien eingelesen werden,
-    * alte Einträge aus DB gelöscht werden
-    * modifizierte Dateien geupdated werden
-    * rekursiv testen
+- Watcher in allen Kombis testen wenn er _ausgeschalten_ war
+    * `done` ob neue Dateien eingelesen werden
+    * `done` alte Einträge aus DB gelöscht werden
+    * `done` modifizierte Dateien geupdated werden
+    * `done` rekursiv testen
+- Watcher in allen Kombis testen wenn er _eingeschalten_ ist
+    * `done`  ob neue Dateien eingelesen werden
+    * `done` alte Einträge aus DB gelöscht werden
+    * `done` modifizierte Dateien geupdated werden
+    * `done` rekursiv testen
 - dev_read_data_with_tika in master mergen
+- testen, ob mit farm finegetunete Modelle von Huggingface akzeptiert werden (z.B. Bert-Squad)
+  * Falls ja, 1. Bert mit Huggingface finetunen (SquadGerman , eigener Datensatz) und prunen **https://github.com/huggingface/transformers/blob/master/examples/movement-pruning/README.md**
+- **neuen dt. SQUAD-like Dataset erstellen (software erstellen, die dafür genutzt werden kann)**
 
 
 
