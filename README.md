@@ -9,8 +9,6 @@ Das Repo beinhaltet eine Suchmaschine, die auf ElasticSearch (ES) basiert. Darü
 - 
 
 
-
-
 ## Nutzung
 
 ### Einrichtung
@@ -89,10 +87,16 @@ $ docker-compose -f docker-compose_dev.yml up
     * `done` alte Einträge aus DB gelöscht werden
     * `done` modifizierte Dateien geupdated werden
     * `done` rekursiv testen
-- dev_read_data_with_tika in master mergen
+- `done` dev_read_data_with_tika in master mergen
 - testen, ob mit farm finegetunete Modelle von Huggingface akzeptiert werden (z.B. Bert-Squad)
   * Falls ja, 1. Bert mit Huggingface finetunen (SquadGerman , eigener Datensatz) und prunen **https://github.com/huggingface/transformers/blob/master/examples/movement-pruning/README.md**
 - **neuen dt. SQUAD-like Dataset erstellen (software erstellen, die dafür genutzt werden kann)**
+- **hier weiter machen** Suchseite zu anpassen, dass neue Komponenten für einen Sucheintrag (z.B. Dateipfad) hinzugefügt werden können (--> html anpassen)
+- Auf german squad fine-getunede Modelle einbinden
+- alles in einen Docker-Container packen
+- [optional] Ggf neuen Datensatz erstellen mit labelling Tool von haystack https://github.com/deepset-ai/haystack
+- Labelling Tool für auf SQUADv2-Datensatz anpassen (plausible answers)
+
 
 
 
