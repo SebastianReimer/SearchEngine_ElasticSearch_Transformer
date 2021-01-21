@@ -6,7 +6,7 @@ Das Repo beinhaltet eine Suchmaschine, die auf ElasticSearch (ES) basiert. Darü
 
 - Haystack: https://github.com/deepset-ai/haystack
 - Building-a-search-engine-using-Elasticsearch: https://github.com/dineshsonachalam/Building-a-search-engine-using-Elasticsearch
-- 
+
 
 
 ## Nutzung
@@ -39,7 +39,7 @@ yellow open document IAQUCD3IQGOC8pywOFU5_A 1 1 2811 0 3mb 3mb
 Hierbei sind im Index `document` `2811` Einträge vorhanden.
 
 
-### "Normale" Nutzung (*ohne* Daten einlesen
+### "Normale" Nutzung (*ohne* Daten einlesen)
 1. ES mithilfe von Docker starten
 '''
 $ docker-compose -f docker-compose_dev.yml up
